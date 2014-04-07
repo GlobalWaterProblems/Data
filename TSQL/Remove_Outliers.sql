@@ -1,3 +1,11 @@
+/*
+
+	This procedure will create a table without outliers from a data set with the same table name and _NoOutliers.
+	The procedure requires the table name, the value for the standard deviation calculation and the deviation
+	amount.  It assumes that the table has an average, standard deviation and id attached.
+
+*/
+
 CREATE PROCEDURE stp_RemoveOutliers
 @t NVARCHAR(500), @v NVARCHAR(250), @dev DECIMAL(3,1)
 AS
