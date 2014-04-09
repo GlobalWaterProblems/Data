@@ -17,23 +17,27 @@ BEGIN
 	SELECT @stdev = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = @t AND COLUMN_NAME LIKE 'StDev%'
 
 	DECLARE @s NVARCHAR(MAX)
-	SET @s = N';WITH OutOutlier AS(
-		SELECT ' + @id + ' NewID
-			, ' + @v + ' OutValue
-			, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) OAbove
-			, (' + @avg + ' + (' + @stdev + ' *-' + CAST(@dev AS NVARCHAR(3)) + ')) OBelow
-		FROM ' + QUOTENAME(@t) + '
-	)
-	SELECT ROW_NUMBER() OVER (ORDER BY ' + @id + ') NoOutlierID
-		, t2.*
-	INTO ' + QUOTENAME(@t + '_NoOutliers') + '
-	FROM OutOutlier t
-		INNER JOIN ' + QUOTENAME(@t) + ' t2 ON t.NewID = t2.' + @id + '
-	WHERE t.OutValue BETWEEN OBelow AND OAbove
+	SET @s = N'IF OBJECT_ID(@t) IS NOT NULL
+	BEGIN
 	
-	ALTER TABLE ' + QUOTENAME(@t + '_NoOutliers') + ' DROP COLUMN ' + @id
+		;WITH OutOutlier AS(
+			SELECT ' + @id + ' NewID
+				, ' + @v + ' OutValue
+				, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) OAbove
+				, (' + @avg + ' + (' + @stdev + ' *-' + CAST(@dev AS NVARCHAR(3)) + ')) OBelow
+			FROM ' + QUOTENAME(@t) + '
+		)
+		SELECT ROW_NUMBER() OVER (ORDER BY ' + @id + ') NoOutlierID
+			, t2.*
+		INTO ' + QUOTENAME(@t + '_NoOutliers') + '
+		FROM OutOutlier t
+			INNER JOIN ' + QUOTENAME(@t) + ' t2 ON t.NewID = t2.' + @id + '
+		WHERE t.OutValue BETWEEN OBelow AND OAbove
+		
+		ALTER TABLE ' + QUOTENAME(@t + '_NoOutliers') + ' DROP COLUMN ' + @id + '
+	END'
 
-	EXEC sp_executesql @s
+	EXEC sp_executesql @s,N'@t NVARCHAR(100)',@t
 	
 END
 
