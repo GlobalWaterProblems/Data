@@ -7,7 +7,7 @@
 */
 
 CREATE PROCEDURE stp_RemoveOutliers
-@t NVARCHAR(500), @v NVARCHAR(250), @dev DECIMAL(3,1)
+@t NVARCHAR(100), @v NVARCHAR(100), @dev DECIMAL(3,1)
 AS
 BEGIN
 
@@ -17,7 +17,7 @@ BEGIN
 	SELECT @stdev = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = @t AND COLUMN_NAME LIKE 'StDev%'
 
 	DECLARE @s NVARCHAR(MAX)
-	SET @s = ';WITH OutOutlier AS(
+	SET @s = N';WITH OutOutlier AS(
 		SELECT ' + @id + ' NewID
 			, ' + @v + ' OutValue
 			, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) OAbove
