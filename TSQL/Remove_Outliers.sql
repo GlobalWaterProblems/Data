@@ -13,8 +13,8 @@ BEGIN
 
 	DECLARE @avg NVARCHAR(250), @stdev NVARCHAR(250), @id NVARCHAR(250)
 	SELECT @id = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @t AND COLUMN_NAME LIKE 'ID%'
-	SELECT @avg = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @t AND COLUMN_NAME LIKE '%Avg%'
-	SELECT @stdev = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = @t AND COLUMN_NAME LIKE '%StDev%'
+	SELECT @avg = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @t AND COLUMN_NAME LIKE 'Avg%'
+	SELECT @stdev = COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = @t AND COLUMN_NAME LIKE 'StDev%'
 
 	DECLARE @s NVARCHAR(MAX)
 	SET @s = ';WITH OutOutlier AS(
@@ -22,16 +22,16 @@ BEGIN
 			, ' + @v + ' OutValue
 			, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) OAbove
 			, (' + @avg + ' + (' + @stdev + ' *-' + CAST(@dev AS NVARCHAR(3)) + ')) OBelow
-		FROM ' + @t + '
+		FROM ' + QUOTENAME(@t) + '
 	)
 	SELECT ROW_NUMBER() OVER (ORDER BY ' + @id + ') NoOutlierID
 		, t2.*
-	INTO ' + @t + '_NoOutliers
+	INTO ' + QUOTENAME(@t + '_NoOutliers') + '
 	FROM OutOutlier t
-		INNER JOIN ' + @t + ' t2 ON t.NewID = t2.' + @id + '
+		INNER JOIN ' + QUOTENAME(@t) + ' t2 ON t.NewID = t2.' + @id + '
 	WHERE t.OutValue BETWEEN OBelow AND OAbove
 	
-	ALTER TABLE ' + @t + '_NoOutliers DROP COLUMN ' + @id
+	ALTER TABLE ' + QUOTENAME(@t + '_NoOutliers') + ' DROP COLUMN ' + @id
 
 	EXEC sp_executesql @s
 	
