@@ -20,8 +20,8 @@ BEGIN
 	SET @s = ';WITH OutOutlier AS(
 		SELECT ' + @id + ' NewID
 			, ' + @v + ' OutValue
-			, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) ThreeAbove
-			, (' + @avg + ' + (' + @stdev + ' *-' + CAST(@dev AS NVARCHAR(3)) + ')) ThreeBelow
+			, (' + @avg + ' + (' + @stdev + ' *' + CAST(@dev AS NVARCHAR(3)) + ')) OAbove
+			, (' + @avg + ' + (' + @stdev + ' *-' + CAST(@dev AS NVARCHAR(3)) + ')) OBelow
 		FROM ' + @t + '
 	)
 	SELECT ROW_NUMBER() OVER (ORDER BY ' + @id + ') NoOutlierID
@@ -29,7 +29,7 @@ BEGIN
 	INTO ' + @t + '_NoOutliers
 	FROM OutOutlier t
 		INNER JOIN ' + @t + ' t2 ON t.NewID = t2.' + @id + '
-	WHERE t.OutValue BETWEEN ThreeBelow AND ThreeAbove
+	WHERE t.OutValue BETWEEN OBelow AND OAbove
 	
 	ALTER TABLE ' + @t + '_NoOutliers DROP COLUMN ' + @id
 
