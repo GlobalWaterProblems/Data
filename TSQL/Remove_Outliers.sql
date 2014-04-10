@@ -1,8 +1,8 @@
 /*
 
 	This procedure will create a table without outliers from a data set with the same table name and _NoOutliers.
-	The procedure requires the table name, the value for the standard deviation calculation and the deviation
-	amount.  It assumes that the table has an average, standard deviation and id attached.
+	The procedure requires the table name, the value for the standard deviation calculation, deviation amount, and
+	schema.  It assumes that the table has an average, standard deviation and id attached.
 
 */
 
@@ -42,6 +42,7 @@ BEGIN
 		ALTER TABLE ' + QUOTENAME(@sh) + '.' + QUOTENAME(@t + '_NoOutliers') + ' DROP COLUMN ' + @id + '
 	END'
 
+	----Debugging:
 	--PRINT @s
 	EXEC sp_executesql @s,N'@to NVARCHAR(100)',@to
 
